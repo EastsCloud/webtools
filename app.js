@@ -163,37 +163,42 @@ function TimerCard(){
 // 每行有“类型(节拍/休止)”，“BPM(仅节拍可编辑)”，“时长(秒)”
 function SequenceCard(){
   const engine = new MetronomeEngine();
-  let steps = [];
+  let steps = []; // {type:'beat'|'rest', bpm:number, seconds:number}
   let idx = 0, timer = null;
   const list = h('div');
 
   function renderList(){
     list.innerHTML = '';
     if(steps.length === 0){
-      list.appendChild(h('div',{class:'mute small'},
-        '还没有片段。节拍（设 BPM 与时长）或 休止（设时长）。'));
+      list.appendChild(
+        h('div',{class:'mute small'},'还没有片段。每个片段固定为：节拍（设 BPM 与时长）或 休止（设时长）。')
+      );
       return;
     }
     steps.forEach((s,i)=>{
-      const typeLabel = h('span',{class:'chip',style:'font-size:12px;padding:4px 8px;'},
-                         s.type==='beat' ? '节拍' : '休止');
+      const idTag   = h('span',{class:'chip',style:'font-size:11px;padding:3px 7px;'}, `#${i+1}`);
+      const typeTag = h('span',{class:'chip',style:'font-size:12px;padding:4px 8px;'},
+                        s.type === 'beat' ? '节拍' : '休止');
+
       const bpmInput = h('input',{
-        type:'number',value:s.bpm,min:'20',max:'300',
-        disabled: s.type==='rest',
-        oninput:e=>s.bpm=+e.target.value
+        type:'number', value:s.bpm, min:'20', max:'300',
+        disabled: s.type === 'rest',
+        oninput:e => s.bpm = +e.target.value
       });
+
       const secInput = h('input',{
-        type:'number',value:s.seconds,min:'1',
-        oninput:e=>s.seconds=+e.target.value
+        type:'number', value:s.seconds, min:'1',
+        oninput:e => s.seconds = +e.target.value
       });
+
       const delBtn = h('button',{
         class:'btn btn-danger',
         onclick:()=>{ steps.splice(i,1); renderList(); }
-      },'删除');
+      }, '删除');
 
       const row = h('div',{class:'row tight',style:'align-items:center'},
-        h('span',{class:'chip',style:'font-size:11px;padding:3px 7px;'},`#${i+1}`),
-        typeLabel,
+        idTag,
+        typeTag,
         h('span',null,'BPM'), bpmInput,
         h('span',null,'时长(秒)'), secInput,
         delBtn
@@ -204,38 +209,38 @@ function SequenceCard(){
 
   const addBeat = h('button',{class:'btn btn-ok'},'＋ 添加节拍片段');
   const addRest = h('button',{class:'btn'},'＋ 添加休止片段');
-  addBeat.onclick = ()=>{ steps.push({type:'beat',bpm:100,seconds:15}); renderList(); };
-  addRest.onclick = ()=>{ steps.push({type:'rest',bpm:100,seconds:10}); renderList(); };
+  addBeat.onclick = ()=>{ steps.push({type:'beat', bpm:100, seconds:15}); renderList(); };
+  addRest.onclick = ()=>{ steps.push({type:'rest', bpm:100, seconds:10}); renderList(); };
 
-  const status = h('span',{class:'chip'},'待机');
-  const startBtn = h('button',{class:'btn btn-ok'},'开始');
+  const status  = h('span',{class:'chip'},'待机');
+  const startBtn= h('button',{class:'btn btn-ok'},'开始');
   const stopBtn = h('button',{class:'btn btn-danger'},'停止');
 
   function runStep(i){
-    if(i>=steps.length){ status.textContent='完成'; engine.stop(); idx=0; return; }
+    if(i >= steps.length){ status.textContent='完成'; engine.stop(); idx=0; return; }
     idx=i;
-    const s=steps[i];
-    status.textContent=`进行 #${i+1}/${steps.length}`;
+    const s = steps[i];
+    status.textContent = `进行 #${i+1}/${steps.length}`;
     clearTimeout(timer);
-    if(s.type==='rest'){
+    if(s.type === 'rest'){
       engine.stop();
-      timer=setTimeout(()=>runStep(i+1), s.seconds*1000);
+      timer = setTimeout(()=>runStep(i+1), s.seconds*1000);
     }else{
       engine.set({bpm:s.bpm}); engine.start();
-      timer=setTimeout(()=>runStep(i+1), s.seconds*1000);
+      timer = setTimeout(()=>runStep(i+1), s.seconds*1000);
     }
   }
 
-  startBtn.onclick=()=>{ if(steps.length===0) return; clearTimeout(timer); runStep(0); };
-  stopBtn.onclick=()=>{ clearTimeout(timer); engine.stop(); status.textContent='已停止'; };
+  startBtn.onclick = ()=>{ if(steps.length===0) return; clearTimeout(timer); runStep(0); };
+  stopBtn.onclick  = ()=>{ clearTimeout(timer); engine.stop(); status.textContent='已停止'; };
 
-  const root=h('div',{class:'card'},
+  const root = h('div',{class:'card'},
     h('h2',null,'序列'),
-    h('div',{class:'row'},addBeat,addRest),
+    h('div',{class:'row'}, addBeat, addRest),
     h('div',{class:'hr'}),
     list,
     h('div',{class:'hr'}),
-    h('div',{class:'row controls'},startBtn,stopBtn,status)
+    h('div',{class:'row controls'}, startBtn, stopBtn, status)
   );
   renderList();
   return root;

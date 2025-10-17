@@ -162,29 +162,38 @@ function TimerCard(){
 // ========= 模块：序列（节拍 or 休止） =========
 // 每行有“类型(节拍/休止)”，“BPM(仅节拍可编辑)”，“时长(秒)”
 function SequenceCard(){
-  const engine=new MetronomeEngine();
-  let steps=[]; // {type:'beat'|'rest', bpm:number, seconds:number}
-  let idx=0, timer=null;
-  const list=h('div');
+  const engine = new MetronomeEngine();
+  let steps = [];
+  let idx = 0, timer = null;
+  const list = h('div');
 
   function renderList(){
-    list.innerHTML='';
-    if(steps.length===0){
-      list.appendChild(h('div',{class:'mute small'},'还没有片段。每个片段类型可选：节拍（设 BPM 与时长）或 休止（设时长）。'));
+    list.innerHTML = '';
+    if(steps.length === 0){
+      list.appendChild(h('div',{class:'mute small'},
+        '还没有片段。节拍（设 BPM 与时长）或 休止（设时长）。'));
       return;
     }
     steps.forEach((s,i)=>{
-      const typeSel = h('select', {oninput:e=>{ s.type=e.target.value; bpmInput.disabled = (s.type==='rest'); }},
-        h('option',{value:'beat', selected: s.type==='beat'},'节拍'),
-        h('option',{value:'rest', selected: s.type==='rest'},'休止'),
-      );
-      const bpmInput = h('input',{type:'number',value:s.bpm,min:'20',max:'300',disabled: s.type==='rest',
-        oninput:e=>s.bpm=+e.target.value});
-      const secInput = h('input',{type:'number',value:s.seconds,min:'1',oninput:e=>s.seconds=+e.target.value});
-      const delBtn = h('button',{class:'btn btn-danger',onclick:()=>{steps.splice(i,1);renderList();}},'删除');
-      const row=h('div',{class:'row tight',style:'align-items:center'},
-        h('span',{class:'chip'},`#${i+1}`),
-        h('span',null,'类型'), typeSel,
+      const typeLabel = h('span',{class:'chip',style:'font-size:12px;padding:4px 8px;'},
+                         s.type==='beat' ? '节拍' : '休止');
+      const bpmInput = h('input',{
+        type:'number',value:s.bpm,min:'20',max:'300',
+        disabled: s.type==='rest',
+        oninput:e=>s.bpm=+e.target.value
+      });
+      const secInput = h('input',{
+        type:'number',value:s.seconds,min:'1',
+        oninput:e=>s.seconds=+e.target.value
+      });
+      const delBtn = h('button',{
+        class:'btn btn-danger',
+        onclick:()=>{ steps.splice(i,1); renderList(); }
+      },'删除');
+
+      const row = h('div',{class:'row tight',style:'align-items:center'},
+        h('span',{class:'chip',style:'font-size:11px;padding:3px 7px;'},`#${i+1}`),
+        typeLabel,
         h('span',null,'BPM'), bpmInput,
         h('span',null,'时长(秒)'), secInput,
         delBtn
@@ -193,14 +202,14 @@ function SequenceCard(){
     });
   }
 
-  const addBeat=h('button',{class:'btn btn-ok'},'＋ 添加节拍片段');
-  const addRest=h('button',{class:'btn'},'＋ 添加休止片段');
-  addBeat.onclick=()=>{ steps.push({type:'beat', bpm:100, seconds:15}); renderList(); };
-  addRest.onclick=()=>{ steps.push({type:'rest', bpm:100, seconds:10}); renderList(); };
+  const addBeat = h('button',{class:'btn btn-ok'},'＋ 添加节拍片段');
+  const addRest = h('button',{class:'btn'},'＋ 添加休止片段');
+  addBeat.onclick = ()=>{ steps.push({type:'beat',bpm:100,seconds:15}); renderList(); };
+  addRest.onclick = ()=>{ steps.push({type:'rest',bpm:100,seconds:10}); renderList(); };
 
-  const status=h('span',{class:'chip'},'待机');
-  const startBtn=h('button',{class:'btn btn-ok'},'开始');
-  const stopBtn=h('button',{class:'btn btn-danger'},'停止');
+  const status = h('span',{class:'chip'},'待机');
+  const startBtn = h('button',{class:'btn btn-ok'},'开始');
+  const stopBtn = h('button',{class:'btn btn-danger'},'停止');
 
   function runStep(i){
     if(i>=steps.length){ status.textContent='完成'; engine.stop(); idx=0; return; }
@@ -231,6 +240,7 @@ function SequenceCard(){
   renderList();
   return root;
 }
+
 
 // ========= 模块：随机数 =========
 function RNGCard(){

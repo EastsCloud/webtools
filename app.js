@@ -153,17 +153,21 @@ function TimerCardBody() {
 	resetBtn.onclick = () => { running = false; render(totalSeconds()); };
 	mins.oninput = secs.oninput = () => { if (!running) render(totalSeconds()); };
 
-	// —— 全部一行 —— //
+	// —— 两行布局 —— //
 	return h('div', null,
+		// 第一行：分秒+模式
 		h('div', { class: 'row inline' },
 			h('span', { class: 'compact-label shrink' }, '分'), mins,
 			h('span', { class: 'compact-label shrink' }, '秒'), secs,
-			h('span', { class: 'compact-label shrink' }, '模式'), modeSel,
-			startBtn, pauseBtn, resetBtn,
-			display
+			h('span', { class: 'compact-label shrink' }, '模式'), modeSel
+		),
+		// 第二行：操作+显示
+		h('div', { class: 'row inline' },
+			startBtn, pauseBtn, resetBtn, display
 		)
 	);
 }
+
 
 
 // ======== 模块：序列（纯文字类型 + 单行：BPM/时长/删除；休止无 BPM） ========

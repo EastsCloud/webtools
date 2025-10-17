@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>WebTools</title>
-  <link rel="stylesheet" href="style.css" />
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+	<title>WebTools</title>
+	<link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <div class="app">
-    <div class="toolbar">
-      <select id="addType">
-        <option value="metronome">添加：节拍器</option>
-        <option value="timer">添加：计时器</option>
-        <option value="sequence">添加：序列（节拍/休止）</option>
-        <option value="rng">添加：随机数</option>
-      </select>
-      <button id="addBtn" class="btn btn-ok">＋ 添加模块</button>
-    </div>
+	<div class="app">
+		<div class="toolbar">
+			<select id="addType">
+				<option value="metronome">添加：节拍器</option>
+				<option value="timer">添加：计时器</option>
+				<option value="sequence">添加：序列（节拍/休止）</option>
+				<option value="rng">添加：随机数</option>
+			</select>
+			<button id="addBtn" class="btn btn-ok">添加模块</button>
+		</div>
 
-    <div id="modules" class="grid"></div>
-  </div>
+		<div id="modules" class="grid"></div>
+	</div>
 
-  <script src="app.js"></script>
+	<script src="app.js"></script>
 </body>
+
 </html>

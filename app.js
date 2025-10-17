@@ -171,21 +171,28 @@ function SequenceCard(){
     list.innerHTML = '';
     if(steps.length === 0){
       list.appendChild(
-        h('div',{class:'mute small'},'还没有片段。每个片段固定为：节拍（设 BPM 与时长）或 休止（设时长）。')
+        h('div',{class:'mute small'},'还没有片段。添加“节拍（BPM+时长）”或“休止（仅时长）”。')
       );
       return;
     }
+
     steps.forEach((s,i)=>{
       const idTag   = h('span',{class:'chip',style:'font-size:11px;padding:3px 7px;'}, `#${i+1}`);
       const typeTag = h('span',{class:'chip',style:'font-size:12px;padding:4px 8px;'},
                         s.type === 'beat' ? '节拍' : '休止');
 
-      const bpmInput = h('input',{
-        type:'number', value:s.bpm, min:'20', max:'300',
-        disabled: s.type === 'rest',
-        oninput:e => s.bpm = +e.target.value
-      });
+      // BPM（仅节拍显示）
+      const bpmBlock = s.type === 'beat'
+        ? [ h('span',null,'BPM'),
+            h('input',{
+              type:'number', value:s.bpm, min:'20', max:'300',
+              oninput:e => s.bpm = +e.target.value
+            })
+          ]
+        : []; // 休止不显示 BPM
 
+      // 时长（节拍/休止都要）
+      const secLabel = h('span',null,'时长(秒)');
       const secInput = h('input',{
         type:'number', value:s.seconds, min:'1',
         oninput:e => s.seconds = +e.target.value
@@ -196,11 +203,12 @@ function SequenceCard(){
         onclick:()=>{ steps.splice(i,1); renderList(); }
       }, '删除');
 
+      // 单行：编号 + 类型 + （可选）BPM + 时长 + 删除
       const row = h('div',{class:'row tight',style:'align-items:center'},
         idTag,
         typeTag,
-        h('span',null,'BPM'), bpmInput,
-        h('span',null,'时长(秒)'), secInput,
+        ...bpmBlock,
+        secLabel, secInput,
         delBtn
       );
       list.appendChild(row);
@@ -210,18 +218,19 @@ function SequenceCard(){
   const addBeat = h('button',{class:'btn btn-ok'},'＋ 添加节拍片段');
   const addRest = h('button',{class:'btn'},'＋ 添加休止片段');
   addBeat.onclick = ()=>{ steps.push({type:'beat', bpm:100, seconds:15}); renderList(); };
-  addRest.onclick = ()=>{ steps.push({type:'rest', bpm:100, seconds:10}); renderList(); };
+  addRest.onclick = ()=>{ steps.push({type:'rest', seconds:10}); renderList(); }; // 无 bpm 字段
 
-  const status  = h('span',{class:'chip'},'待机');
-  const startBtn= h('button',{class:'btn btn-ok'},'开始');
-  const stopBtn = h('button',{class:'btn btn-danger'},'停止');
+  const status   = h('span',{class:'chip'},'待机');
+  const startBtn = h('button',{class:'btn btn-ok'},'开始');
+  const stopBtn  = h('button',{class:'btn btn-danger'},'停止');
 
   function runStep(i){
     if(i >= steps.length){ status.textContent='完成'; engine.stop(); idx=0; return; }
-    idx=i;
+    idx = i;
     const s = steps[i];
     status.textContent = `进行 #${i+1}/${steps.length}`;
     clearTimeout(timer);
+
     if(s.type === 'rest'){
       engine.stop();
       timer = setTimeout(()=>runStep(i+1), s.seconds*1000);
